@@ -237,11 +237,11 @@ def postprocess_args(args):
         args.musl_install = True
         args.libelf_install = True
         args.libopenpop_install = False
-        args.stacktransform_install = True
-        args.migration_install = True
-        args.stackdepth_install = True
-        args.tools_install = True
-        args.utils_install = True
+        args.stacktransform_install = False #True
+        args.migration_install = False #True
+        args.stackdepth_install = False #True
+        args.tools_install = False #True
+        args.utils_install = False #True
 
     # Add install_path to the PATH environment variable
     os.environ["PATH"] = args.install_path + "/bin:" + os.environ["PATH"]
@@ -276,7 +276,7 @@ def check_for_prerequisites(args):
     gcc_prerequisites = ['x86_64-linux-gnu-g++']
     for target in args.install_targets:
         gcc_prerequisites.append('{}-linux-gnu-gcc'.format(target))
-    other_prerequisites = ['flex', 'bison', 'svn', 'cmake', 'make', 'zip']
+    other_prerequisites = ['flex', 'bison', 'cmake', 'make', 'zip']
 
     for prereq in gcc_prerequisites:
         out = _check_for_prerequisite(prereq)
@@ -329,25 +329,25 @@ def install_clang_llvm(base_path, install_path, num_threads, llvm_targets):
     llvm_download_path = os.path.join(install_path, 'src', 'llvm')
     clang_download_path = os.path.join(llvm_download_path, 'tools', 'clang')
 
-    patch_base = os.path.join(base_path, 'patches', 'llvm')
-    llvm_patch_path = os.path.join(patch_base,
-                                   'llvm-{}.patch'.format(llvm_version))
+#    patch_base = os.path.join(base_path, 'patches', 'llvm')
+#    llvm_patch_path = os.path.join(patch_base,
+#                                   'llvm-{}.patch'.format(llvm_version))
 
-    if llvm_version == 3.7:
-        cmake_flags = ['-DCMAKE_INSTALL_PREFIX={}'.format(install_path),
-                       '-DLLVM_TARGETS_TO_BUILD={}'.format(llvm_targets),
-                       '-DCMAKE_BUILD_TYPE=Debug',
-                       '-DLLVM_ENABLE_RTTI=ON',
-                       '-DBUILD_SHARED_LIBS=ON']
-    else:
-        cmake_flags = ['-DCMAKE_INSTALL_PREFIX={}'.format(install_path),
-                       '-DLLVM_TARGETS_TO_BUILD={}'.format(llvm_targets),
-                       '-DCMAKE_BUILD_TYPE=Debug',
-                       '-DLLVM_ENABLE_RTTI=ON',
-                       '-DBUILD_SHARED_LIBS=ON',
-                       '-DLLVM_EXTERNAL_PROJECTS="clang;"',
-                       '-DLLVM_EXTERNAL_CLANG_SOURCE_DIR={}'
-                       .format(llvm_download_path + "/clang")]
+#    if llvm_version == 3.7:
+#        cmake_flags = ['-DCMAKE_INSTALL_PREFIX={}'.format(install_path),
+#                       '-DLLVM_TARGETS_TO_BUILD={}'.format(llvm_targets),
+#                       '-DCMAKE_BUILD_TYPE=Debug',
+#                       '-DLLVM_ENABLE_RTTI=ON',
+#                       '-DBUILD_SHARED_LIBS=ON']
+#    else:
+    cmake_flags = ['-DCMAKE_INSTALL_PREFIX={}'.format(install_path),
+                   '-DLLVM_TARGETS_TO_BUILD={}'.format(llvm_targets),
+                   '-DCMAKE_BUILD_TYPE=Debug',
+                   '-DLLVM_ENABLE_RTTI=ON',
+                   '-DBUILD_SHARED_LIBS=ON',
+                   '-DLLVM_EXTERNAL_PROJECTS="clang;"',
+                   '-DLLVM_EXTERNAL_CLANG_SOURCE_DIR={}'
+                   .format(llvm_download_path + "/clang")]
 
     #=====================================================
     # DOWNLOAD LLVM
@@ -365,16 +365,16 @@ def install_clang_llvm(base_path, install_path, num_threads, llvm_targets):
     #=====================================================
     # PATCH LLVM
     #=====================================================
-    with open(llvm_patch_path, 'r') as patch_file:
-        print('Patching LLVM...')
-        args = ['patch', '-p1', '-d', llvm_download_path]
-        run_cmd('patch LLVM', args, patch_file)
+#    with open(llvm_patch_path, 'r') as patch_file:
+#        print('Patching LLVM...')
+#        args = ['patch', '-p1', '-d', llvm_download_path]
+#        run_cmd('patch LLVM', args, patch_file)
         
     # LLVM-3.7's build system needs clang inside llvm/tools
-    if llvm_version == 3.7:
-        clang_src = os.path.join(llvm_download_path, 'clang')
-        clang_dst = os.path.join(llvm_download_path, 'llvm', 'tools')
-        shutil.move(clang_src, clang_dst)
+#    if llvm_version == 3.7:
+#        clang_src = os.path.join(llvm_download_path, 'clang')
+#        clang_dst = os.path.join(llvm_download_path, 'llvm', 'tools')
+#        shutil.move(clang_src, clang_dst)
     
     #=====================================================
     # BUILD AND INSTALL LLVM
@@ -389,9 +389,9 @@ def install_clang_llvm(base_path, install_path, num_threads, llvm_targets):
     run_cmd('run CMake', args)
 
     print('Running Make...')
-    if llvm_version > 3.7:
-        args = ['make', '-j', str(num_threads), 'install-llvm-headers']
-        run_cmd('run Make headers', args)
+#    if llvm_version > 3.7:
+#        args = ['make', '-j', str(num_threads), 'install-llvm-headers']
+#        run_cmd('run Make headers', args)
 
     args = ['make', '-j', str(num_threads)]
     run_cmd('run Make', args)
@@ -405,8 +405,8 @@ def install_binutils(base_path, install_path, num_threads, target):
 
     binutils_install_path = os.path.join(install_path, 'src', 'binutils-2.32')
 
-    patch_path = os.path.join(base_path, 'patches', 'binutils-gold',
-                              'binutils-2.32.patch')
+#    patch_path = os.path.join(base_path, 'patches', 'binutils-gold',
+#                              'binutils-2.32.patch')
 
     configure_flags = ['--prefix={}'.format(install_path),
                        '--enable-gold',
@@ -431,10 +431,10 @@ def install_binutils(base_path, install_path, num_threads, target):
     #=====================================================
     # PATCH BINUTILS
     #=====================================================
-    print("Patching binutils...")
-    with open(patch_path, 'r') as patch_file:
-        args = ['patch', '-p1', '-d', binutils_install_path]
-        run_cmd('patch binutils', args, patch_file)
+#    print("Patching binutils...")
+#    with open(patch_path, 'r') as patch_file:
+#        args = ['patch', '-p1', '-d', binutils_install_path]
+#        run_cmd('patch binutils', args, patch_file)
 
     #=====================================================
     # BUILD AND INSTALL BINUTILS
@@ -487,7 +487,8 @@ def install_musl(base_path, install_path, target, num_threads):
                      '--enable-wrapper=all',
                      '--disable-shared',
                      'CC={}/bin/clang'.format(install_path),
-                     'CFLAGS="-target {}-linux-gnu -popcorn-libc"' \
+                     'CFLAGS="-target {}-linux-gnu"' \
+#                     'CFLAGS="-target {}-linux-gnu -popcorn-libc"' \
                      .format(target),
                      'KERVER="{}"'.format(kernel_arg)])
     print(args)
